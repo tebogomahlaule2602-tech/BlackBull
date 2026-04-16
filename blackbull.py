@@ -22,3 +22,31 @@ elif command == "info":
 
 else:
     print(f"Unknown command: '{command}'. Try 'greet' or 'status'.")
+import sys
+from cryptography.fernet import Fernet
+
+def load_key():
+    return open("secret.key", "rb").read()
+
+args = sys.argv[1:]
+
+if not args:
+    print("Usage: b [greet | status | lock | unlock]")
+    sys.exit()
+
+cmd = args[0].lower()
+
+if cmd == "lock":
+    secret = args[1] if len(args) > 1 else input("Secret: ")
+    f = Fernet(load_key())
+    with open("vault.bin", "wb") as v:
+        v.write(f.encrypt(secret.encode()))
+    print("🔒 Secret locked in vault.bin")
+
+elif cmd == "unlock":
+    f = Fernet(load_key())
+    with open("vault.bin", "rb") as v:
+        print(f"🔓 Content: {f.decrypt(v.read()).decode()}")
+
+elif cmd == "status":
+    print("All systems green. Vault is active.")
